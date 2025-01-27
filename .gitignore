@@ -1,0 +1,55 @@
+# Archivos de compilación
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.pdb
+*.log
+*.vspscc
+*.vssscc
+*.csproj.user
+*.suo
+*.user
+*.lock.json
+
+# Archivos de paquetes NuGet
+*.nupkg
+project.lock.json
+packages/
+.nuget/
+
+# Archivos de configuración de usuario
+.vs/
+.idea/
+*.sln.ide
+*.sln.docstates
+
+# Archivos de cache y temporales
+*.cache
+*.tmp
+*.log
+*.db
+*.bak
+*.swp
+
+# Archivos de configuración de Docker
+docker-compose.override.yml
+.dockerignore
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos específicos de Rider/JetBrains
+.idea/
+*.sln.iml
+
+# Archivos específicos de Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Configuración de secretos y credenciales sensibles
+appsettings.Development.json
+secrets.json
+.env
