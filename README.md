@@ -205,3 +205,203 @@ The candidate must provide clear instructions for:
 
 ---
 *Note: For any questions or clarifications about requirements, please create an issue in the repository.*
+---
+# Medical Records Management System - Installation Guide
+
+## Table of Contents
+1. [PostgreSQL Installation](#1-postgresql-installation)
+2. [Database Setup](#2-database-setup)
+3. [Project Configuration](#3-project-configuration)
+4. [Entity Framework Setup](#4-entity-framework-setup)
+5. [Running the Application](#5-running-the-application)
+
+## 1. PostgreSQL Installation
+
+### Windows
+1. Download PostgreSQL installer:
+   - Go to https://www.postgresql.org/download/windows/
+   - Download the latest version (17.x or newer)
+   - Run the installer
+
+2. During installation:
+   - Select all components
+   - Set password for postgres user
+   - Default port: 5432
+   - Default locale
+
+3. Verify installation:
+   - Open Command Prompt
+   - Type: `psql --version`
+   - Should see version information
+
+### MacOS
+Using Homebrew:
+   ```bash
+   brew install postgresql@14
+   brew services start postgresql@14
+   ```
+
+### Linux
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+
+## 2. Database Setup
+
+1. Create Database:
+```sql
+CREATE DATABASE RRHH_DB;
+```
+
+2. Execute the following SQL scripts in order:
+
+```sql
+CREATE TABLE STATUS (
+    STATUS_ID SERIAL PRIMARY KEY,
+    NAME VARCHAR(100),
+    DESCRIPTION VARCHAR(500)
+);
+
+CREATE TABLE MEDICAL_RECORD_TYPE (
+    MEDICAL_RECORD_TYPE_ID SERIAL PRIMARY KEY,
+    NAME VARCHAR(100),
+    DESCRIPTION VARCHAR(500)
+);
+
+CREATE TABLE T_MEDICAL_RECORD (
+    MEDICAL_RECORD_ID SERIAL PRIMARY KEY,
+    FILE_ID INTEGER,
+    AUDIOMETRY VARCHAR(2),
+    POSITION_CHANGE VARCHAR(2),
+    MOTHER_DATA VARCHAR(2000),
+    DIAGNOSIS VARCHAR(100),
+    OTHER_FAMILY_DATA VARCHAR(2000),
+    FATHER_DATA VARCHAR(2000),
+    EXECUTE_MICROS VARCHAR(2),
+    EXECUTE_EXTRA VARCHAR(2),
+    VOICE_EVALUATION VARCHAR(2),
+    DELETION_DATE DATE,
+    CREATION_DATE DATE,
+    MODIFICATION_DATE DATE,
+    END_DATE DATE,
+    START_DATE DATE,
+    STATUS_ID INTEGER,
+    MEDICAL_RECORD_TYPE_ID INTEGER,
+    DISABILITY VARCHAR(2),
+    MEDICAL_BOARD VARCHAR(200),
+    DELETION_REASON VARCHAR(2000),
+    OBSERVATIONS VARCHAR(2000),
+    DISABILITY_PERCENTAGE NUMERIC(10),
+    DELETED_BY VARCHAR(2000),
+    CREATED_BY VARCHAR(2000),
+    MODIFIED_BY VARCHAR(2000),
+    AREA_CHANGE VARCHAR(2)
+);
+
+ALTER TABLE T_MEDICAL_RECORD
+ADD CONSTRAINT FK_STATUS_ID_RECORD
+FOREIGN KEY (STATUS_ID) REFERENCES STATUS(STATUS_ID);
+
+ALTER TABLE T_MEDICAL_RECORD
+ADD CONSTRAINT FK_MEDICAL_RECORD_TYPE
+FOREIGN KEY (MEDICAL_RECORD_TYPE_ID) REFERENCES MEDICAL_RECORD_TYPE(MEDICAL_RECORD_TYPE_ID);
+
+INSERT INTO STATUS (NAME, DESCRIPTION) VALUES
+('Active', 'Active medical record'),
+('Inactive', 'Inactive medical record');
+
+INSERT INTO MEDICAL_RECORD_TYPE (NAME, DESCRIPTION) VALUES
+('Regular', 'Regular medical record'),
+('Special', 'Special medical record');
+```
+
+## 3. Project Configuration
+
+1. Clone the repository:
+```bash
+git clone https://github.com/JulianMartinezz/PuebaTecnicaBackend-Gabriel-HerreraB.git
+cd PuebaTecnicaBackend-Gabriel-HerreraB
+cd Backend
+```
+
+2. Install .NET 8.0 SDK:
+   - Download from: https://dotnet.microsoft.com/download/dotnet/8.0
+
+3. Install required NuGet packages:
+```bash
+dotnet add package Microsoft.EntityFrameworkCore --version 9.0.1
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 9.0.1
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 9.0.1
+dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 9.0.3
+dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection --version 12.0.1
+dotnet add package FluentValidation.AspNetCore --version 11.3.0
+```
+
+4. Configure appsettings.json:
+```json
+{
+  "ConnectionStrings": {
+    "PostgresConnection": "Host=localhost;Database=RRHH_DB;Username=postgres;Password=your_password"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+## 4. Entity Framework Setup
+
+1. Install EF Core tools globally:
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+2. Scaffold the database:
+```bash
+dotnet ef dbcontext scaffold "Host=localhost;Database=RRHH_DB;Username=postgres;Password=your_password" Npgsql.EntityFrameworkCore.PostgreSQL -o Models -c HRDbContext -f --no-onconfiguring
+```
+
+3. Update DbContext to use configuration:
+```csharp
+public HRDbContext(DbContextOptions<HRDbContext> options) : base(options)
+{
+}
+```
+
+4. Verify Fluent API configurations in DbContext:
+```csharp
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    base.OnModelCreating(modelBuilder);
+}
+```
+
+## 5. Running the Application
+
+1. Build the project:
+```bash
+dotnet build
+```
+
+2. Run the application:
+```bash
+dotnet run
+```
+
+3. Access Swagger UI:
+- Open browser
+- Navigate to: https://localhost:5001/swagger (or http://localhost:5000/swagger)
+
+4. Verify API endpoints:
+- GET /api/MedicalRecord/GetFilterMedicalRecords
+- GET /api/MedicalRecord/{id}
+- POST /api/MedicalRecord
+- PUT /api/MedicalRecord
+- DELETE /api/MedicalRecord
